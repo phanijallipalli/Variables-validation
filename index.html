@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Query Parser</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        .missing {
+            background-color: #f2dede;
+            color: #a94442;
+        }
+    </style>
+</head>
+<body>
+    <h1>URL Query Parser</h1>
+    <form id="queryForm">
+        <label for="urlInput">URL or Query String:</label>
+        <input type="text" id="urlInput" name="url" required>
+        <br><br>
+        <button type="submit">Submit</button>
+    </form>
+    <h2>Parsed Result</h2>
+    <table id="resultTable">
+        <thead>
+            <tr>
+                <th>Variable</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <script>
+        document.getElementById('queryForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            parseInput();
+        });
+
+        const variablesOfInterest = {
+            'Page Name': 'pageName',
+            'URL': 'g',
+            'Site Section': 'ch',
+            'Time': 't',
+            'AEM Property': 'c38',
+            'Events': 'events',
+            'P1 eVar 1': 'v1',
+            'P1 eVar 5': 'v5',
+            'P1 eVar 9': 'v9',
+            'P1 eVar 10': 'v10',
+            'P1 eVar 11': 'v11',
+            'P1 eVar 16': 'v16',
+            'P1 eVar 78': 'v78',
+            'P1 eVar 80': 'v80',
+            'P1 eVar 137': 'v137',
+            'P1 Prop 1': 'c1',
+            'P1 Prop 7': 'c7',
+            'P1 Prop 11': 'c11',
+            'P1 Prop 15': 'c15',
+            'P1 Prop 35': 'c35',
+            'P1 Prop 36': 'c36',
+            '---': 'Separator',
+            'P2 eVar 2': 'v2',
+            'P2 eVar 3': 'v3',
+            'P2 eVar 4': 'v4',
+            'P2 eVar 7': 'v7',
+            'P2 eVar 8': 'v8',
+            'P2 Prop 2': 'c2',
+            'P2 Prop 8': 'c8',
+            'P2 Prop 9': 'c9',
+            'P2 Prop 10': 'c10',
+            'P2 Prop 12': 'c12',
+            'P2 Prop 13': 'c13',
+            'P2 Prop 14': 'c14',
+            'P3 eVar 13': 'v13',
+            'Fired Rules': 'c39',
+        };
+
+        function parseInput() {
+            const input = document.getElementById('urlInput').value;
+            let queryString = '';
+
+            try {
+                if (input.includes('?')) {
+                    const url = new URL(input);
+                    queryString = url.search;
+                } else {
+                    queryString = input.startsWith('?') ? input : '?' + input;
+                }
+
+                const urlParams = new URLSearchParams(queryString);
+                const resultTableBody = document.getElementById('resultTable').querySelector('tbody');
+                resultTableBody.innerHTML = '';
+
+                for (const [varName, key] of Object.entries(variablesOfInterest)) {
+                    if (key === 'Separator') {
+                        const row = document.createElement('tr');
+                        const cell = document.createElement('td');
+                        cell.colSpan = 2;
+                        cell.style.textAlign = 'center';
+                        cell.style.fontWeight = 'bold';
+                        cell.innerText = '---';
+                        row.appendChild(cell);
+                        resultTableBody.appendChild(row);
+                        continue;
+                    }
+
+                    let value = urlParams.get(key) || 'MISSING!';
+                    if (['v7', 'c13'].includes(key) && value !== 'MISSING!') {
+                        value = `Browser Info: ${value}`;
+                    }
+
+                    const row = document.createElement('tr');
+                    const varCell = document.createElement('td');
+                    varCell.innerText = varName;
+                    const valueCell = document.createElement('td');
+                    valueCell.innerText = value;
+                    if (value === 'MISSING!') {
+                        valueCell.classList.add('missing');
+                    }
+                    row.appendChild(varCell);
+                    row.appendChild(valueCell);
+                    resultTableBody.appendChild(row);
+                }
+            } catch (error) {
+                alert('Invalid URL or Query String');
+            }
+        }
+    </script>
+</body>
+</html>
