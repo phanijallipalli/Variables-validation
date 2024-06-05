@@ -108,6 +108,7 @@
         document.getElementById('queryForm').addEventListener('submit', function (event) {
             event.preventDefault();
             parseInput();
+            document.getElementById('urlInput').value = ''; // Clear the input after parsing
         });
 
         const variablesOfInterest = {
@@ -152,17 +153,21 @@
 
         function parseInput() {
             const input = document.getElementById('urlInput').value;
-            let queryString = '';
+            let params = {};
 
             try {
-                if (input.includes('?')) {
-                    const url = new URL(input);
-                    queryString = url.search;
+                if (input.trim().startsWith('{')) {
+                    // Input is JSON
+                    params = JSON.parse(input);
                 } else {
-                    queryString = input.startsWith('?') ? input : '?' + input;
+                    // Input is query string
+                    const queryString = input.startsWith('?') ? input : '?' + input;
+                    const urlParams = new URLSearchParams(queryString);
+                    for (const [key, value] of urlParams.entries()) {
+                        params[key] = value;
+                    }
                 }
 
-                const urlParams = new URLSearchParams(queryString);
                 const resultTableBody = document.getElementById('resultTable').querySelector('tbody');
                 resultTableBody.innerHTML = '';
 
@@ -174,31 +179,30 @@
                         cell.colSpan = 2;
                         cell.style.textAlign = 'center';
                         cell.style.fontWeight = 'bold';
-                        cell.innerText = '---';
+                        cell.textContent = '---';
                         row.appendChild(cell);
                         resultTableBody.appendChild(row);
                         continue;
                     }
 
-                    let value = urlParams.get(key) || 'MISSING!';
-                    if (['v7', 'c13'].includes(key) && value !== 'MISSING!') {
-                        value = `Browser Info: ${value}`;
-                    }
-
+                    const value = params[key] || 'MISSING';
                     const row = document.createElement('tr');
                     const varCell = document.createElement('td');
-                    varCell.innerHTML = `<div class="tooltip">${varName}<span class="tooltiptext">${tooltip}</span></div>`;
                     const valueCell = document.createElement('td');
-                    valueCell.innerText = value;
-                    if (value === 'MISSING!') {
+
+                    varCell.innerHTML = tooltip ? `<span class="tooltip">${varName}<span class="tooltiptext">${tooltip}</span></span>` : varName;
+                    valueCell.textContent = value;
+
+                    if (value === 'MISSING') {
                         valueCell.classList.add('missing');
                     }
+
                     row.appendChild(varCell);
                     row.appendChild(valueCell);
                     resultTableBody.appendChild(row);
                 }
             } catch (error) {
-                alert('Invalid URL or Query String');
+                alert('Invalid input format. Please provide a valid JSON or URL query string.');
             }
         }
     </script>
