@@ -11,6 +11,19 @@
             gap: 20px;
             padding: 20px;
         }
+        nav {
+            grid-column: span 2;
+            margin-bottom: 20px;
+        }
+        nav a {
+            margin-right: 20px;
+            text-decoration: none;
+            color: black;
+        }
+        nav a.current {
+            font-weight: bold;
+            text-decoration: underline;
+        }
         #queryForm {
             display: flex;
             flex-direction: column;
@@ -66,6 +79,10 @@
     </style>
 </head>
 <body>
+    <nav>
+        <a href="url_query_parser.html" class="current">URL Query Parser</a>
+        <a href="product_syntax_validator.html">Product Syntax Validator</a>
+    </nav>
     <div>
         <h1>URL Query Parser</h1>
         <form id="queryForm">
@@ -165,7 +182,8 @@
 
                     let value = urlParams.get(key) || 'MISSING!';
                     if (['v7', 'c13'].includes(key) && value !== 'MISSING!') {
-                        value = `Browser Info: ${value}`;
+                        const userAgent = new UAParser(value).getResult();
+                        value = `${userAgent.browser.name} ${userAgent.browser.version}`;
                     }
 
                     const row = document.createElement('tr');
