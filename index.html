@@ -182,8 +182,7 @@
 
                     let value = urlParams.get(key) || 'MISSING!';
                     if (['v7', 'c13'].includes(key) && value !== 'MISSING!') {
-                        const userAgent = new UAParser(value).getResult();
-                        value = `${userAgent.browser.name} ${userAgent.browser.version}`;
+                        value = `Browser Info: ${value}`;
                     }
 
                     const row = document.createElement('tr');
