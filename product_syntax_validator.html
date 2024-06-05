@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Syntax Validator</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+        nav {
+            margin-bottom: 20px;
+        }
+        nav a {
+            margin-right: 20px;
+            text-decoration: none;
+            color: black;
+        }
+        nav a.current {
+            font-weight: bold;
+            text-decoration: underline;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+        textarea, input {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        button {
+            align-self: flex-start;
+            padding: 10px 20px;
+        }
+        .result {
+            margin-top: 20px;
+        }
+        .valid {
+            color: green;
+        }
+        .invalid {
+            color: red;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        .pageNameHeading {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .deleteButton {
+            margin-left: 10px;
+            padding: 5px 10px;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="url_query_parser.html">URL Query Parser</a>
+        <a href="product_syntax_validator.html" class="current">Product Syntax Validator</a>
+    </nav>
+    <h1>Product Syntax Validator</h1>
+    <form id="productForm">
+        <label for="pageNameInput">Page Name:</label>
+        <input type="text" id="pageNameInput" name="pageName" required>
+        <label for="syntaxInput">Product Syntax:</label>
+        <textarea id="syntaxInput" name="syntax" required></textarea>
+        <button type="submit">Validate</button>
+    </form>
+    <div id="result" class="result"></div>
+    <div id="tablesContainer"></div>
+    <script>
+        document.getElementById('productForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            validateSyntax();
+        });
+
+        function validateSyntax() {
+            const pageName = document.getElementById('pageNameInput').value.trim();
+            const input = document.getElementById('syntaxInput').value.trim();
+            const resultDiv = document.getElementById('result');
+            const tablesContainer = document.getElementById('tablesContainer');
+
+            resultDiv.innerHTML = '';
+
+            if (!input || !pageName) {
+                resultDiv.innerText = 'Please provide both page name and product syntax.';
+                resultDiv.classList.add('invalid');
+                return;
+            }
+
+            const productEntries = input.split(',');
+            const tableContainer = document.createElement('div');
+            tableContainer.classList.add('tableContainer');
+
+            const pageNameHeading = document.createElement('div');
+            pageNameHeading.classList.add('pageNameHeading');
+            pageNameHeading.innerHTML = `${pageName}<button class="deleteButton" onclick="deleteTableContainer(this)">Delete</button>`;
+            tableContainer.appendChild(pageNameHeading);
+
+            const table = document.createElement('table');
+            const thead = document.createElement('thead');
+            const tbody = document.createElement('tbody');
+            table.appendChild(thead);
+            table.appendChild(tbody);
+
+            thead.innerHTML = `
+                <tr>
+                    <th>Category ID</th>
+                    <th>Product ID/SKU</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Events</th>
+                    <th>eVars</th>
+                </tr>
+            `;
+
+            for (const productEntry of productEntries) {
+                const parts = productEntry.split(';');
+                if (parts.length < 5) {
+                    continue;
+                }
+
+                const [categoryId, productIdSku, quantity, unitPrice, events, eVars] = parts;
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${categoryId}</td>
+                    <td>${productIdSku}</td>
+                    <td>${quantity}</td>
+                    <td>${unitPrice}</td>
+                    <td>${events}</td>
+                    <td>${eVars}</td>
+                `;
+                tbody.appendChild(row);
+            }
+
+            tableContainer.appendChild(table);
+            tablesContainer.insertBefore(tableContainer, tablesContainer.firstChild); // Append before existing tables
+            resultDiv.innerText = 'Syntax is valid!';
+            resultDiv.classList.remove('invalid');
+            resultDiv.classList.add('valid');
+            document.getElementById('productForm').reset();
+        }
+
+        function deleteTableContainer(button) {
+            const tableContainer = button.parentElement.parentElement;
+            tableContainer.remove();
+        }
+    </script>
+</body>
+</html>
