@@ -5,6 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>URL Query Parser</title>
     <style>
+        body {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            padding: 20px;
+        }
+        #queryForm {
+            display: flex;
+            flex-direction: column;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin-bottom: 20px;
+        }
+        button {
+            align-self: flex-start;
+            padding: 10px 20px;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -20,27 +39,54 @@
             background-color: #f2dede;
             color: #a94442;
         }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 220px;
+            background-color: black;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%; /* Position above the text */
+            left: 50%;
+            margin-left: -110px; /* Center the tooltip */
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
-    <h1>URL Query Parser</h1>
-    <form id="queryForm">
-        <label for="urlInput">URL or Query String:</label>
-        <input type="text" id="urlInput" name="url" required>
-        <br><br>
-        <button type="submit">Submit</button>
-    </form>
-    <h2>Parsed Result</h2>
-    <table id="resultTable">
-        <thead>
-            <tr>
-                <th>Variable</th>
-                <th>Value</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
+    <div>
+        <h1>URL Query Parser</h1>
+        <form id="queryForm">
+            <label for="urlInput">URL or Query String:</label>
+            <textarea id="urlInput" name="url" required></textarea>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+    <div>
+        <h2>Parsed Result</h2>
+        <table id="resultTable">
+            <thead>
+                <tr>
+                    <th>Variable</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
     <script>
         document.getElementById('queryForm').addEventListener('submit', function (event) {
             event.preventDefault();
@@ -48,42 +94,43 @@
         });
 
         const variablesOfInterest = {
-            'Page Name': 'pageName',
-            'URL': 'g',
-            'Site Section': 'ch',
-            'Time': 't',
-            'AEM Property': 'c38',
-            'Events': 'events',
-            'P1 eVar 1': 'v1',
-            'P1 eVar 5': 'v5',
-            'P1 eVar 9': 'v9',
-            'P1 eVar 10': 'v10',
-            'P1 eVar 11': 'v11',
-            'P1 eVar 16': 'v16',
-            'P1 eVar 78': 'v78',
-            'P1 eVar 80': 'v80',
-            'P1 eVar 137': 'v137',
-            'P1 Prop 1': 'c1',
-            'P1 Prop 7': 'c7',
-            'P1 Prop 11': 'c11',
-            'P1 Prop 15': 'c15',
-            'P1 Prop 35': 'c35',
-            'P1 Prop 36': 'c36',
-            '---': 'Separator',
-            'P2 eVar 2': 'v2',
-            'P2 eVar 3': 'v3',
-            'P2 eVar 4': 'v4',
-            'P2 eVar 7': 'v7',
-            'P2 eVar 8': 'v8',
-            'P2 Prop 2': 'c2',
-            'P2 Prop 8': 'c8',
-            'P2 Prop 9': 'c9',
-            'P2 Prop 10': 'c10',
-            'P2 Prop 12': 'c12',
-            'P2 Prop 13': 'c13',
-            'P2 Prop 14': 'c14',
-            'P3 eVar 13': 'v13',
-            'Fired Rules': 'c39',
+            'Page Name': {key: 'pageName', tooltip: ''},
+            'URL': {key: 'g', tooltip: 'Prop 37 - Page URL (p37)'},
+            'Site Section': {key: 'ch', tooltip: ''},
+            'Time': {key: 't', tooltip: ''},
+            'AEM Property': {key: 'c38', tooltip: 'Prop 38 - Adobe Launch Property (p38)'},
+            'Events': {key: 'events', tooltip: ''},
+            'P1 eVar 1': {key: 'v1', tooltip: 'eVar 1 - URL (v1)'},
+            'P1 eVar 5': {key: 'v5', tooltip: 'eVar 5 - Previous Page Name (v5)'},
+            'P1 eVar 9': {key: 'v9', tooltip: 'eVar 9 - User ID (v9)'},
+            'P1 eVar 10': {key: 'v10', tooltip: 'eVar 10 - Customer Type (v10)'},
+            'P1 eVar 11': {key: 'v11', tooltip: 'eVar 11 - Logged In State (v11)'},
+            'P1 eVar 16': {key: 'v16', tooltip: 'eVar 16 - Customer Pals Number (v16)'},
+            'P1 eVar 78': {key: 'v78', tooltip: 'eVar 78 - Page Name (v78)'},
+            'P1 eVar 80': {key: 'v80', tooltip: 'eVar 80 - Page Type (v80)'},
+            'P1 eVar 137': {key: 'v137', tooltip: 'eVar 137 - OneTrust - Consent (v137)'},
+            'P1 Prop 1': {key: 'c1', tooltip: 'Prop 1 - Pacific Time Zone Date Time (p1)'},
+            'P1 Prop 7': {key: 'c7', tooltip: 'Prop 7 - URL (p7)'},
+            'P1 Prop 11': {key: 'c11', tooltip: 'Prop 11 - Previous Page Name (p11)'},
+            'P1 Prop 15': {key: 'c15', tooltip: 'Prop 15 - User ID (p15)'},
+            'P1 Prop 35': {key: 'c35', tooltip: 'Prop 35 - Page Name (p35)'},
+            'P1 Prop 36': {key: 'c36', tooltip: 'Prop 36 - Page Type (p36)'},
+            '---': {key: 'Separator', tooltip: ''},
+            'P2 eVar 2': {key: 'v2', tooltip: 'eVar 2 - Page ID (v2)'},
+            'P2 eVar 3': {key: 'v3', tooltip: 'eVar 3 - Language (v3)'},
+            'P2 eVar 4': {key: 'v4', tooltip: 'eVar 4 - Site Country (v4)'},
+            'P2 eVar 7': {key: 'v7', tooltip: 'eVar 7 - User Agent (v7)'},
+            'P2 eVar 8': {key: 'v8', tooltip: 'eVar 8 - Marketing Cloud ID (v8)'},
+            'P2 Prop 2': {key: 'c2', tooltip: 'Prop 2 - Build Version (p2)'},
+            'P2 Prop 8': {key: 'c8', tooltip: 'Prop 8 - Page ID (p8)'},
+            'P2 Prop 9': {key: 'c9', tooltip: 'Prop 9 - Language (p9)'},
+            'P2 Prop 10': {key: 'c10', tooltip: 'Prop 10 - Site Country (p10)'},
+            'P2 Prop 12': {key: 'c12', tooltip: 'Prop 12 - Time Part (p12)'},
+            'P2 Prop 13': {key: 'c13', tooltip: 'Prop 13 - User Agent (p13)'},
+            'P2 Prop 14': {key: 'c14', tooltip: 'Prop 14 - Marketing Cloud ID (p14)'},
+            'P2 Prop 15': {key: 'c15', tooltip: 'Prop 15 - User ID (p15)'},
+            'P3 eVar 13': {key: 'v13', tooltip: 'eVar 13 - Impression Tracking - SKU Level (v13)'},
+            'Fired Rules': {key: 'c39', tooltip: 'Prop 39 - RuleName+EventName (p39)'},
         };
 
         function parseInput() {
@@ -102,7 +149,8 @@
                 const resultTableBody = document.getElementById('resultTable').querySelector('tbody');
                 resultTableBody.innerHTML = '';
 
-                for (const [varName, key] of Object.entries(variablesOfInterest)) {
+                for (const [varName, obj] of Object.entries(variablesOfInterest)) {
+                    const { key, tooltip } = obj;
                     if (key === 'Separator') {
                         const row = document.createElement('tr');
                         const cell = document.createElement('td');
@@ -122,7 +170,7 @@
 
                     const row = document.createElement('tr');
                     const varCell = document.createElement('td');
-                    varCell.innerText = varName;
+                    varCell.innerHTML = `<div class="tooltip">${varName}<span class="tooltiptext">${tooltip}</span></div>`;
                     const valueCell = document.createElement('td');
                     valueCell.innerText = value;
                     if (value === 'MISSING!') {
