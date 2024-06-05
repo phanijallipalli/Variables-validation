@@ -98,6 +98,7 @@
             const tablesContainer = document.getElementById('tablesContainer');
 
             resultDiv.innerHTML = '';
+            resultDiv.classList.remove('invalid', 'valid');
 
             if (!input || !pageName) {
                 resultDiv.innerText = 'Please provide both page name and product syntax.';
@@ -131,13 +132,20 @@
                 </tr>
             `;
 
+            let isValid = true;
             for (const productEntry of productEntries) {
                 const parts = productEntry.split(';');
-                if (parts.length < 5) {
-                    continue;
+                if (parts.length < 4) {
+                    isValid = false;
+                    break;
                 }
 
-                const [categoryId, productIdSku, quantity, unitPrice, events, eVars] = parts;
+                const [categoryId, productIdSku, quantity, unitPrice, events = '', eVars = ''] = parts;
+
+                if (isNaN(quantity) || isNaN(unitPrice)) {
+                    isValid = false;
+                    break;
+                }
 
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -151,12 +159,16 @@
                 tbody.appendChild(row);
             }
 
-            tableContainer.appendChild(table);
-            tablesContainer.insertBefore(tableContainer, tablesContainer.firstChild); // Append before existing tables
-            resultDiv.innerText = 'Syntax is valid!';
-            resultDiv.classList.remove('invalid');
-            resultDiv.classList.add('valid');
-            document.getElementById('productForm').reset();
+            if (isValid) {
+                tableContainer.appendChild(table);
+                tablesContainer.insertBefore(tableContainer, tablesContainer.firstChild); // Append before existing tables
+                resultDiv.innerText = 'Syntax is valid!';
+                resultDiv.classList.add('valid');
+                document.getElementById('productForm').reset();
+            } else {
+                resultDiv.innerText = 'Invalid product syntax. Please check your input.';
+                resultDiv.classList.add('invalid');
+            }
         }
 
         function deleteTableContainer(button) {
