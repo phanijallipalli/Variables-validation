@@ -1,78 +1,172 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Syntax Validator</title>
     <style>
         body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
             display: flex;
             flex-direction: column;
+            align-items: center;
             padding: 20px;
         }
+
         nav {
+            background: #007bff;
+            padding: 10px;
+            border-radius: 8px;
             margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
         }
+
         nav a {
-            margin-right: 20px;
+            color: white;
             text-decoration: none;
-            color: black;
-        }
-        nav a.current {
             font-weight: bold;
+        }
+
+        nav a.current {
             text-decoration: underline;
         }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            width: 100%;
+        }
+
         form {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
             display: flex;
             flex-direction: column;
-            margin-bottom: 20px;
+            gap: 10px;
         }
-        textarea, input {
+
+        label {
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        textarea {
             width: 100%;
-            margin-bottom: 20px;
+            padding: 10px;
+            /* Ensure uniform padding */
+            border: 2px solid #ccc;
+            /* Consistent border */
+            border-radius: 5px;
+            /* Smooth edges */
+            box-sizing: border-box;
+            /* Ensures padding doesn’t affect width */
+            font-size: 16px;
         }
+
+        textarea {
+            resize: vertical;
+            /* Allow vertical resizing */
+            min-height: 100px;
+        }
+
         button {
-            align-self: flex-start;
-            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
         }
+
+        button:hover {
+            background: #0056b3;
+        }
+
         .result {
             margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
         }
+
         .valid {
             color: green;
         }
+
         .invalid {
             color: red;
         }
+
+        .tableContainer {
+            background: white;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            /* Make it full width */
+            max-width: 100%;
+            overflow-x: auto;
+        }
+
         table {
             width: 100%;
+            /* Ensures table stretches full width */
             border-collapse: collapse;
-            margin-top: 20px;
         }
-        table, th, td {
-            border: 1px solid black;
-        }
-        th, td {
+
+        th,
+        td {
             padding: 10px;
             text-align: left;
+            word-wrap: break-word;
+            white-space: pre-line;
+            /* Ensures new lines appear */
         }
-        .pageNameHeading {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            margin-top: 20px;
+
+        table,
+        th,
+        td {
+            border: 1px solid #ddd;
         }
+
+        th {
+            background: #007bff;
+            color: white;
+        }
+
+        th:hover {
+            background: #0056b3;
+            color: yellow;
+            transition: background 0.3s, color 0.3s;
+        }
+
         .deleteButton {
-            margin-left: 10px;
+            background: #dc3545;
+            color: white;
+            border: none;
             padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .deleteButton:hover {
+            background: #c82333;
         }
     </style>
 </head>
+
 <body>
     <nav>
-        <a href="index.html">URL Query Parser</a>
+        <a href="index.html">Adobe Beacon Parser</a>
         <a href="product_syntax_validator.html" class="current">Product Syntax Validator</a>
     </nav>
     <h1>Product Syntax Validator</h1>
@@ -111,57 +205,57 @@
             tableContainer.classList.add('tableContainer');
 
             const pageNameHeading = document.createElement('div');
-            pageNameHeading.classList.add('pageNameHeading');
-            pageNameHeading.innerHTML = `${pageName}<button class="deleteButton" onclick="deleteTableContainer(this)">Delete</button>`;
+            pageNameHeading.style.display = 'flex';
+            pageNameHeading.style.justifyContent = 'space-between';
+            pageNameHeading.innerHTML = `<strong>${pageName}</strong> 
+        <button class="deleteButton" onclick="this.parentElement.parentElement.remove()">Delete</button>`;
             tableContainer.appendChild(pageNameHeading);
 
             const table = document.createElement('table');
-            const thead = document.createElement('thead');
-            const tbody = document.createElement('tbody');
-            table.appendChild(thead);
-            table.appendChild(tbody);
-
-            thead.innerHTML = `
-                <tr>
-                    <th>Category ID</th>
-                    <th>Product ID/SKU</th>
-                    <th>Quantity</th>
-                    <th>Unit Price</th>
-                    <th>Events</th>
-                    <th>eVars</th>
-                </tr>
-            `;
+            table.innerHTML = `
+        <thead>
+            <tr>
+                <th>Category ID</th>
+                <th>Product ID/SKU</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Events</th>
+                <th>eVars</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    `;
 
             let isValid = true;
-            for (const productEntry of productEntries) {
-                const parts = productEntry.split(';');
-                if (parts.length < 4) {
+            const tbody = table.querySelector('tbody');
+            productEntries.forEach(entry => {
+                const parts = entry.split(';');
+                if (parts.length < 4 || isNaN(parts[2]) || isNaN(parts[3])) {
                     isValid = false;
-                    break;
+                    return;
                 }
 
-                const [categoryId, productIdSku, quantity, unitPrice, events = '', eVars = ''] = parts;
-
-                if (isNaN(quantity) || isNaN(unitPrice)) {
-                    isValid = false;
-                    break;
-                }
+                // Format Events and eVars to split by | and display in new lines
+                const eventsFormatted = (parts[4] || '').split('|').join('<br>');
+                const evarsFormatted = (parts[5] || '').split('|').join('<br>');
 
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${categoryId}</td>
-                    <td>${productIdSku}</td>
-                    <td>${quantity}</td>
-                    <td>${unitPrice}</td>
-                    <td>${events}</td>
-                    <td>${eVars}</td>
-                `;
+            <td>${parts[0]}</td>
+            <td>${parts[1]}</td>
+            <td>${parts[2]}</td>
+            <td>${parts[3]}</td>
+            <td>${eventsFormatted}</td>
+            <td>${evarsFormatted}</td>
+            <td><button class='deleteButton' onclick='this.parentElement.parentElement.remove()'>Delete</button></td>
+        `;
                 tbody.appendChild(row);
-            }
+            });
 
             if (isValid) {
                 tableContainer.appendChild(table);
-                tablesContainer.insertBefore(tableContainer, tablesContainer.firstChild); // Append before existing tables
+                tablesContainer.insertBefore(tableContainer, tablesContainer.firstChild);
                 resultDiv.innerText = 'Syntax is valid!';
                 resultDiv.classList.add('valid');
                 document.getElementById('productForm').reset();
@@ -171,10 +265,7 @@
             }
         }
 
-        function deleteTableContainer(button) {
-            const tableContainer = button.parentElement.parentElement;
-            tableContainer.remove();
-        }
     </script>
 </body>
+
 </html>
