@@ -3,62 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>URL Query Parser</title>
+    <title>Adobe Beacon Parser</title>
     <style>
-        body {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 20px;
-            padding: 20px;
-        }
-        nav {
-            grid-column: span 2;
-            margin-bottom: 20px;
-        }
-        nav a {
-            margin-right: 20px;
-            text-decoration: none;
-            color: black;
-        }
-        nav a.current {
-            font-weight: bold;
-            text-decoration: underline;
-        }
-        #queryForm {
+                body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
             display: flex;
             flex-direction: column;
+            align-items: center;
+            padding: 20px;
         }
-        textarea {
+
+        nav {
+            background: #007bff;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        nav a.current {
+            text-decoration: underline;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
             width: 100%;
-            height: 100px;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 600px;
             margin-bottom: 20px;
         }
-        button {
-            align-self: flex-start;
-            padding: 10px 20px;
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
+
+        label {
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .valid {
+            color: green;
+        }
+
+        .invalid {
+            color: red;
+        }
+
+        .tableContainer {
+            background: white;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
+            margin-top: 10px;
         }
-        table, th, td {
-            border: 1px solid black;
-        }
-        th, td {
+
+        th,
+        td {
             padding: 10px;
             text-align: left;
+            word-wrap: break-word;
+            white-space: pre-line;
         }
+
+        table,
+        th,
+        td {
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+
+        th:hover {
+            background: #0056b3;
+            color: yellow;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
         .missing {
-            background-color: #f2dede;
+            background-color: #ffdddd;
             color: #a94442;
+            font-weight: bold;
         }
+
+        .deleteButton {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .deleteButton:hover {
+            background: #c82333;
+        }
+
         .tooltip {
             position: relative;
             display: inline-block;
+            cursor: help;
         }
+
         .tooltip .tooltiptext {
             visibility: hidden;
-            width: 220px;
+            width: 250px;
             background-color: black;
             color: #fff;
             text-align: center;
@@ -66,25 +186,27 @@
             padding: 5px;
             position: absolute;
             z-index: 1;
-            bottom: 125%; /* Position above the text */
+            bottom: 125%;
             left: 50%;
-            margin-left: -110px; /* Center the tooltip */
+            margin-left: -125px;
             opacity: 0;
             transition: opacity 0.3s;
         }
+
         .tooltip:hover .tooltiptext {
             visibility: visible;
             opacity: 1;
         }
+
     </style>
 </head>
 <body>
     <nav>
-        <a href="index.html" class="current">URL Query Parser</a>
+        <a href="index.html" class="current">Adobe Beacon Parser</a>
         <a href="product_syntax_validator.html">Product Syntax Validator</a>
     </nav>
     <div>
-        <h1>URL Query Parser</h1>
+        <h1>Adobe Beacon Parser</h1>
         <form id="queryForm">
             <label for="urlInput">URL or Query String:</label>
             <textarea id="urlInput" name="url" required></textarea>
