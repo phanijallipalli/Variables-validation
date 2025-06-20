@@ -538,14 +538,16 @@ Example:
         }
 
         function escapeHTML(str) {
-            if (str) {
-                str.replace(/&/g, "&amp;")
-                    .replace(/</g, "&lt;")
-                    .replace(/>/g, "&gt;");
-            }
+    if (typeof str !== "string") {
+        return str;
+    }
 
-            return str
-        }
+    return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+}
+
 
         function deepCompare(obj1, obj2, path = []) {
             const mismatches = [];
