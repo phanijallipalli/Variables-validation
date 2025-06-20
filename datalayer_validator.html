@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adobe Data Layer Validator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Enhanced Navigation Styles */
+        nav {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            padding: 0;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        nav li {
+            flex: 1;
+        }
+
+        nav a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 18px 20px;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        nav li:last-child a {
+            border-right: none;
+        }
+
+        nav a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+            color: #fff;
+        }
+
+        nav a.current {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-weight: 700;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        nav a.current::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 3px;
+            background: #fff;
+            border-radius: 2px;
+        }
+
+        /* Icon styles for navigation */
+        nav a::before {
+            content: '';
+            margin-right: 8px;
+            font-size: 1.1em;
+        }
+
+        nav a[href*="index"]::before {
+            content: '📊';
+        }
+
+        nav a[href*="product"]::before {
+            content: '✅';
+        }
+
+        nav a[href*="datalayer"]::before {
+            content: '🔧';
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .input-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .input-group:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+        }
+
+        .input-group textarea {
+            width: 100%;
+            min-height: 300px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            resize: vertical;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .input-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .validate-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .validate-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .validate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .validate-btn:active {
+            transform: translateY(0);
+        }
+
+        .validate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results-section {
+            margin-top: 30px;
+        }
+
+        .results-header {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border-left: 5px solid #28a745;
+        }
+
+        .results-header.error {
+            border-left-color: #dc3545;
+        }
+
+        .results-header h3 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .mismatch-list {
+            background: #fff5f5;
+            border: 1px solid #fed7d7;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .mismatch-item {
+            padding: 10px;
+            border-bottom: 1px solid #fed7d7;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        .mismatch-item:last-child {
+            border-bottom: none;
+        }
+
+        .json-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .json-panel {
+            background: #f8f9fa;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 2px solid #e9ecef;
+        }
+
+        .json-panel-header {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            font-weight: 600;
+        }
+
+        .json-content {
+            height: 400px;
+            overflow-y: auto;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            position: relative;
+        }
+
+        .json-line {
+            display: flex;
+            padding: 2px 0;
+        }
+
+        .json-line.mismatch {
+            background-color: #fff5f5;
+        }
+
+        .line-number {
+            width: 40px;
+            text-align: right;
+            padding-right: 10px;
+            color: #6c757d;
+            background: #f1f3f4;
+            border-right: 1px solid #dee2e6;
+            user-select: none;
+            flex-shrink: 0;
+        }
+
+        .line-content {
+            padding-left: 10px;
+            flex: 1;
+            white-space: pre;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .error-message {
+            background: #fff5f5;
+            border: 1px solid #fed7d7;
+            color: #c53030;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+
+        @media (max-width: 768px) {
+            .input-section {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .json-comparison {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <ul>
+            <li><a href="index.html">Adobe Beacon Parser</a></li>
+            <li><a href="product_syntax_validator.html">Product Syntax Validator</a></li>
+            <li><a href="datalayer_validator.html" class="current">Datalayer Validator</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Adobe Data Layer Validator</h1>
+            <p>Compare raw ADL skeleton vs. implemented dataLayer to find mismatches</p>
+        </div>
+        <div class="main-content">
+            <div class="input-section">
+                <div class="input-group">
+                    <label for="rawInput">📄 Raw ADL Skeleton</label>
+                    <textarea id="rawInput" placeholder="Paste your raw Adobe Data Layer skeleton here...
+
+Example:
+window.adobeDataLayer = window.adobeDataLayer || [];
+adobeDataLayer.push({
+  page: {
+    pageInfo: {
+      pageName: '<page_name>',
+      siteSection: '<site_section>'
+    }
+  }
+});"></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label for="implementedInput">🌐 Implemented DataLayer JSON</label>
+                    <textarea id="implementedInput" placeholder="Paste the implemented dataLayer JSON from the live site here...
+
+Example:
+{
+  page: {
+    pageInfo: {
+      pageName: 'Home Page',
+      siteSection: 'Main'
+    }
+  }
+}"></textarea>
+                </div>
+            </div>
+
+            <div class="validate-section">
+                <button class="validate-btn" onclick="validateDataLayers()">
+                    🔍 Validate Data Layers
+                </button>
+                <div class="loading" id="loading">Processing...</div>
+            </div>
+
+            <div class="results-section" id="resultsSection" style="display: none;">
+                <div class="results-header" id="resultsHeader">
+                    <h3 id="resultsTitle"></h3>
+                    <div id="resultsSummary"></div>
+                </div>
+
+                <div id="mismatchContainer" style="display: none;">
+                    <div class="mismatch-list" id="mismatchList"></div>
+                </div>
+
+                <div class="json-comparison">
+                    <div class="json-panel">
+                        <div class="json-panel-header">📄 Processed Raw ADL</div>
+                        <div class="json-content" id="rawJsonContent"></div>
+                    </div>
+                    <div class="json-panel">
+                        <div class="json-panel-header">🌐 Implemented DataLayer</div>
+                        <div class="json-content" id="implementedJsonContent"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let mismatchedLines = new Set();
+
+        function cleanRawInput(input) {
+            // Remove JavaScript comments
+            let cleaned = input.replace(/\/\*[\s\S]*?\*\//g, '');
+            cleaned = cleaned.replace(/\/\/.*$/gm, '');
+
+            var placeholderPaths = []
+
+
+            return cleaned.trim();
+        }
+
+        function evaluateRawADL(cleanedInput) {
+            try {
+                // Create a safe evaluation context
+                const safeEval = new Function(`
+                    // const window = { adobeDataLayer: [] };
+                    // let adobeDataLayer = window.adobeDataLayer;
+                    
+                    ${cleanedInput}
+                    
+                    // Merge all pushed objects
+                    // const result = adobeDataLayer.reduce((acc, item) => {
+                    //     return deepMerge(acc, item);
+                    // }, {});
+                    
+                    // function deepMerge(target, source) {
+                    //     const output = Object.assign({}, target);
+                    //     if (isObject(target) && isObject(source)) {
+                    //         Object.keys(source).forEach(key => {
+                    //             if (isObject(source[key])) {
+                    //                 if (!(key in target))
+                    //                     Object.assign(output, { [key]: source[key] });
+                    //                 else
+                    //                     output[key] = deepMerge(target[key], source[key]);
+                    //             } else {
+                    //                 Object.assign(output, { [key]: source[key] });
+                    //             }
+                    //         });
+                    //     }
+                    //     return output;
+                    // }
+
+                    const result = adobeDataLayer[adobeDataLayer.length-1]
+                    
+                    // function isObject(item) {
+                    //     return item && typeof item === 'object' && !Array.isArray(item);
+                    // }
+                    console.log("##evaluateRawADL", result)
+                    return result;
+                `);
+
+                return safeEval();
+            } catch (error) {
+                throw new Error(`Failed to evaluate raw ADL: ${error}`);
+            }
+        }
+
+        function parseImplementedJSON(input) {
+            try {
+                return JSON.parse(input);
+            } catch (error) {
+                throw new Error(`Invalid JSON in implemented dataLayer: ${error.message}`);
+            }
+        }
+
+        function normalizeArrays(obj1, obj2) {
+            function normalizeObject(obj, reference) {
+                const result = JSON.parse(JSON.stringify(obj));
+
+                function normalize(current, ref, path = []) {
+                    if (Array.isArray(current) && Array.isArray(ref)) {
+                        const maxLength = ref.length;
+                        if (current.length < maxLength) {
+                            const lastItem = current[current.length - 1];
+                            while (current.length < maxLength) {
+                                current.push(JSON.parse(JSON.stringify(lastItem)));
+                            }
+                        } else if (current.length > maxLength) {
+                            current.splice(maxLength);
+                        }
+
+                        for (let i = 0; i < current.length; i++) {
+                            if (typeof current[i] === 'object' && current[i] !== null) {
+                                normalize(current[i], ref[i] || {}, [...path, i]);
+                            }
+                        }
+                    } else if (typeof current === 'object' && current !== null && typeof ref === 'object' && ref !== null) {
+                        Object.keys(current).forEach(key => {
+                            if (ref.hasOwnProperty(key)) {
+                                normalize(current[key], ref[key], [...path, key]);
+                            }
+                        });
+                        Object.keys(ref).forEach(key => {
+                            if (!current.hasOwnProperty(key)) {
+                                normalize(current[key], ref[key], [...path, key]);
+                            }
+                        });
+                    }
+                }
+
+                normalize(result, reference);
+                return result;
+            }
+
+            const normalized1 = normalizeObject(obj1, obj2);
+
+            return [normalized1, obj2];
+        }
+
+        function deepCompare(obj1, obj2, path = []) {
+            const mismatches = [];
+            const placeholderPaths = window.placeholderPaths || [];
+
+            function compare(val1, val2, currentPath) {
+                // Skip comparison if this path was a placeholder in the raw skeleton
+                const currentPathStr = currentPath.join('.');
+                const isPlaceholder = placeholderPaths.some(placeholderPath =>
+                    currentPathStr.endsWith(placeholderPath) ||
+                    currentPath[currentPath.length - 1] === placeholderPath
+                );
+                console.log("##", isPlaceholder, val1, val2)
+
+
+                if (val1 === val2) return;
+                if (val1 === "") return;
+                if (typeof val1 === "string" && val1.includes("<") && val2 && val2 !== "") return;
+
+                if (typeof val1 !== typeof val2) {
+                    mismatches.push({
+                        path: currentPath.join('.'),
+                        expected: val1,
+                        actual: val2,
+                        type: 'type_mismatch'
+                    });
+                    return;
+                }
+
+                if (Array.isArray(val1) && Array.isArray(val2)) {
+                    const maxLength = Math.max(val1.length, val2.length);
+                    for (let i = 0; i < maxLength; i++) {
+                        compare(val1[i], val2[i], [...currentPath, i]);
+                    }
+                } else if (typeof val1 === 'object' && val1 !== null && val2 !== null) {
+                    const allKeys = new Set([...Object.keys(val1), ...Object.keys(val2)]);
+                    allKeys.forEach(key => {
+                        compare(val1[key], val2[key], [...currentPath, key]);
+                    });
+                } else {
+                    mismatches.push({
+                        path: currentPath.join('.'),
+                        expected: val1,
+                        actual: val2,
+                        type: 'value_mismatch'
+                    });
+                }
+            }
+
+            compare(obj1, obj2, path);
+            return mismatches;
+        }
+
+        function formatJSON(obj) {
+            return JSON.stringify(obj, null, 2);
+        }
+
+        function createJsonDisplay(json, containerId, mismatches = []) {
+            const container = document.getElementById(containerId);
+            const lines = json.split('\n');
+            const placeholderPaths = window.placeholderPaths || [];
+
+            // Find lines that contain mismatched paths
+            const mismatchPaths = mismatches.map(m => m.path);
+            const linesMismatched = new Set();
+
+            lines.forEach((line, index) => {
+                mismatchPaths.forEach(path => {
+                    if (line.includes(`"${path.split('.').pop()}"`)) {
+                        linesMismatched.add(index);
+                    }
+                });
+            });
+
+            container.innerHTML = '';
+            lines.forEach((line, index) => {
+                const lineDiv = document.createElement('div');
+                lineDiv.className = 'json-line';
+
+                // Check if this line contains a placeholder field
+                const isPlaceholderLine = placeholderPaths.some(placeholderPath =>
+                    line.includes(`"${placeholderPath}"`)
+                );
+
+                if (linesMismatched.has(index)) {
+                    lineDiv.classList.add('mismatch');
+                    mismatchedLines.add(index);
+                } else if (isPlaceholderLine && containerId === 'rawJsonContent') {
+                    // Highlight placeholder lines in raw JSON with a different color
+                    lineDiv.style.backgroundColor = '#f0f8ff';
+                    lineDiv.title = 'Dynamic field - excluded from comparison';
+                }
+
+                const lineNumber = document.createElement('div');
+                lineNumber.className = 'line-number';
+                lineNumber.textContent = index + 1;
+
+                const lineContent = document.createElement('div');
+                lineContent.className = 'line-content';
+                lineContent.textContent = line;
+
+                lineDiv.appendChild(lineNumber);
+                lineDiv.appendChild(lineContent);
+                container.appendChild(lineDiv);
+            });
+        }
+
+        function displayResults(rawProcessed, implementedProcessed, mismatches) {
+            const resultsSection = document.getElementById('resultsSection');
+            const resultsHeader = document.getElementById('resultsHeader');
+            const resultsTitle = document.getElementById('resultsTitle');
+            const resultsSummary = document.getElementById('resultsSummary');
+            const mismatchContainer = document.getElementById('mismatchContainer');
+            const mismatchList = document.getElementById('mismatchList');
+
+            resultsSection.style.display = 'block';
+
+            if (mismatches.length === 0) {
+                resultsHeader.classList.remove('error');
+                resultsTitle.textContent = '✅ All values match!';
+                resultsSummary.textContent = 'The raw ADL skeleton and implemented dataLayer are identical.';
+                mismatchContainer.style.display = 'none';
+            } else {
+                resultsHeader.classList.add('error');
+                resultsTitle.textContent = `❌ ${mismatches.length} mismatch${mismatches.length > 1 ? 'es' : ''} found`;
+                resultsSummary.textContent = 'The following differences were detected:';
+                mismatchContainer.style.display = 'block';
+
+                mismatchList.innerHTML = mismatches.map(mismatch => `
+                    <div class="mismatch-item">
+                        <strong>Path:</strong> ${mismatch.path || 'root'}<br>
+                        <strong>Expected:</strong> ${JSON.stringify(mismatch.expected)}<br>
+                        <strong>Actual:</strong> ${JSON.stringify(mismatch.actual)}
+                    </div>
+                `).join('');
+            }
+
+            // Display formatted JSON with line numbers
+            mismatchedLines.clear();
+            createJsonDisplay(formatJSON(rawProcessed), 'rawJsonContent', mismatches);
+            createJsonDisplay(formatJSON(implementedProcessed), 'implementedJsonContent', mismatches);
+
+            // Sync scroll between panels
+            const rawContent = document.getElementById('rawJsonContent');
+            const implementedContent = document.getElementById('implementedJsonContent');
+
+            rawContent.onscroll = () => {
+                implementedContent.scrollTop = rawContent.scrollTop;
+            };
+
+            implementedContent.onscroll = () => {
+                rawContent.scrollTop = implementedContent.scrollTop;
+            };
+        }
+
+        function showError(message) {
+            const resultsSection = document.getElementById('resultsSection');
+            resultsSection.innerHTML = `<div class="error-message">${message}</div>`;
+            resultsSection.style.display = 'block';
+        }
+
+        async function validateDataLayers() {
+            const rawInput = document.getElementById('rawInput').value.trim();
+            const implementedInput = document.getElementById('implementedInput').value.trim();
+            const validateBtn = document.querySelector('.validate-btn');
+            const loading = document.getElementById('loading');
+
+            if (!rawInput || !implementedInput) {
+                showError('Please provide both raw ADL skeleton and implemented dataLayer JSON.');
+                return;
+            }
+
+            validateBtn.disabled = true;
+            loading.style.display = 'block';
+
+            try {
+                // Process inputs
+                const cleanedRaw = cleanRawInput(rawInput);
+                const rawProcessed = evaluateRawADL(cleanedRaw);
+                const implementedProcessed = parseImplementedJSON(implementedInput);
+
+                // Normalize arrays
+                const [normalizedRaw, normalizedImplemented] = normalizeArrays(rawProcessed, implementedProcessed);
+
+                // Compare
+                const mismatches = deepCompare(normalizedRaw, normalizedImplemented);
+
+                // Display results
+                displayResults(normalizedRaw, normalizedImplemented, mismatches);
+
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                validateBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        }
+
+        // Add keyboard shortcut
+        document.addEventListener('keydown', function (e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                validateDataLayers();
+            }
+        });
+    </script>
+</body>
+
+</html>
