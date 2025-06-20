@@ -538,9 +538,13 @@ Example:
         }
 
         function escapeHTML(str) {
-            return str.replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;");
+            if (str) {
+                str.replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;");
+            }
+
+            return str
         }
 
         function deepCompare(obj1, obj2, path = []) {
