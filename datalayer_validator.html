@@ -537,6 +537,12 @@ Example:
             return [normalized1, obj2];
         }
 
+        function escapeHTML(str) {
+            return str.replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+        }
+
         function deepCompare(obj1, obj2, path = []) {
             const mismatches = [];
             const placeholderPaths = window.placeholderPaths || [];
@@ -667,8 +673,8 @@ Example:
                 mismatchList.innerHTML = mismatches.map(mismatch => `
                     <div class="mismatch-item">
                         <strong>Path:</strong> ${mismatch.path || 'root'}<br>
-                        <strong>Expected:</strong> ${JSON.stringify(mismatch.expected)}<br>
-                        <strong>Actual:</strong> ${JSON.stringify(mismatch.actual)}
+                        <strong>Expected:</strong> ${escapeHTML(JSON.stringify(mismatch.expected))}<br>
+                        <strong>Actual:</strong> ${escapeHTML(JSON.stringify(mismatch.actual))}
                     </div>
                 `).join('');
             }
